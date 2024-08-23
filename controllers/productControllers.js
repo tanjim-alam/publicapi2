@@ -1,0 +1,42 @@
+import productModel from "../models/productModel.js";
+import ApiError from "../utils/ApiError.js";
+import ApiResponse from "../utils/ApiResponse.js";
+import uploadCloudinary from "../utils/cloudinary.js";
+
+export const createProduct = async (req, res, next) => {
+    const { name, price, description } = req.body;
+    if (!name || !price) {
+        return next(new ApiError(400, "Name and Price are required"))
+    };
+
+    try {
+        const product = await productModel.create({
+            name,
+            price,
+            description,
+            image: {}
+        });
+
+        if (req.file) {
+            const imageLocalPath = req.file.path;
+            // if(!imageLocalPath){
+            //     next(new ApiError(400, "Image file is required"))
+            // }
+            const image = await uploadCloudinary(imageLocalPath);
+            if (!image) {
+                next(new ApiError(400, "Image file is required"));
+            }
+
+            product.image.public_id = image.public_id;
+            product.image.secure_url = image.secure_url || "https://res.cloudinary.com/du9jzqlpt/image/upload/v1674647316/avatar_drzgxv.jpg";
+            await product.save();
+            res.status(201).json(
+                new ApiResponse(200, product, "Product created successfully")
+            )
+        }
+    } catch (error) {
+        console.log(error);
+        return next(new ApiError(400, "Image file is required"));
+    }
+
+}

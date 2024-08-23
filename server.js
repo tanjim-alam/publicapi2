@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import dbConnection from "./config/dbConnection.js";
 import cors from "cors";
+import productRoutes from "./routes/productRoutes.js";
 dotenv.config();
 
 
@@ -17,6 +18,8 @@ app.get("/", async (req, res) => {
         message: "Welcome to public api"
     })
 });
+
+app.use("/api/v1/product", productRoutes)
 dbConnection();
 const PORT = 8091;
 app.listen(PORT, () => {
