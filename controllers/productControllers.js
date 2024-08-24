@@ -92,6 +92,7 @@ export const updateProduct = async (req, res, next) => {
             name: name || product.name,
             category: category || product.category.name,
             price: price || product.price,
+            description: description || product.description,
             image: {}
         }, { new: true })
 
@@ -111,5 +112,21 @@ export const updateProduct = async (req, res, next) => {
     } catch (error) {
         console.log(error);
         return next(new ApiError(503, "Failed to update product"))
+    }
+};
+
+export const deleteProduct = async (req, res, next) => {
+    const { pid } = req.params;
+    if (!pid) {
+        return next(new ApiError(400, "Product id is required"))
+    }
+    try {
+        const deletedProduct = await productModel.findByIdAndDelete(pid);
+        res.status(201).json(
+            new ApiResponse(200, "Product deleted successfully")
+        )
+    } catch (error) {
+        console.log(error);
+        return next(new ApiError(503, "Failed to delete product"))
     }
 }
