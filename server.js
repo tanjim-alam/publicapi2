@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import dbConnection from "./config/dbConnection.js";
 import cors from "cors";
 import productRoutes from "./routes/productRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
 dotenv.config();
 
 
@@ -19,7 +20,8 @@ app.get("/", async (req, res) => {
     })
 });
 
-app.use("/api/v1/product", productRoutes)
+app.use("/api/v1/product", productRoutes);
+app.use("/api/v1/category", categoryRoutes);
 dbConnection();
 const PORT = 8091;
 app.listen(PORT, () => {
