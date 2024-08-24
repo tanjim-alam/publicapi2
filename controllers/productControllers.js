@@ -24,7 +24,7 @@ export const createProduct = async (req, res, next) => {
             //     next(new ApiError(400, "Image file is required"))
             // }
             const image = await uploadCloudinary(imageLocalPath);
-            console.log(image)
+            // console.log(image)
             if (!image) {
                 next(new ApiError(400, "Image file is required"));
             }
@@ -75,5 +75,41 @@ export const getProduct = async (req, res, next) => {
         )
     } catch (error) {
         return next(new ApiError(503, "Failed to fetch products"))
+    }
+};
+
+
+export const updateProduct = async (req, res, next) => {
+    const { pid } = req.params;
+    if (!pid) {
+        return next(new ApiError(400, "Product id is required"))
+    }
+    const { name, price, description, category } = req.body;
+    try {
+        const product = await productModel.findById(pid).populate("category");
+
+        const updatedProduct = await productModel.findByIdAndUpdate(pid, {
+            name: name || product.name,
+            category: category || product.category.name,
+            price: price || product.price,
+            image: {}
+        }, { new: true })
+
+        if (req.file) {
+            const imageLocalPath = req.file.path;
+            const image = await uploadCloudinary(imageLocalPath);
+            if (!image) {
+                next(new ApiError(400, "Image file is required"));
+            }
+            updatedProduct.image.public_id = image.public_id || product.image.public_id;
+            updatedProduct.image.secure_url = image.secure_url || product.image.secure_url;
+        }
+        await updatedProduct.save();
+        res.status(201).json(
+            new ApiResponse(200, updatedProduct, "Product updated successfully")
+        )
+    } catch (error) {
+        console.log(error);
+        return next(new ApiError(503, "Failed to update product"))
     }
 }
