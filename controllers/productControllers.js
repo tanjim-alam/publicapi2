@@ -41,4 +41,21 @@ export const createProduct = async (req, res, next) => {
         return next(new ApiError(400, "Image file is required"));
     }
 
+};
+
+// get all products
+
+export const getProducts = async (req, res, next) => {
+    try {
+        const products = await productModel.find().populate("category");
+        if (!products) {
+            return next(new ApiError(401, "Something went wrong"));
+        }
+        res.status(201).json(
+            new ApiResponse(200, products, "Products fetched successfully")
+        )
+    } catch (error) {
+        console.log(error);
+        return next(new ApiError(503, "Failed to fetch products"));
+    }
 }
