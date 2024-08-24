@@ -44,7 +44,6 @@ export const createProduct = async (req, res, next) => {
 };
 
 // get all products
-
 export const getProducts = async (req, res, next) => {
     try {
         const products = await productModel.find().populate("category");
@@ -57,5 +56,24 @@ export const getProducts = async (req, res, next) => {
     } catch (error) {
         console.log(error);
         return next(new ApiError(503, "Failed to fetch products"));
+    }
+}
+
+//get single product
+export const getProduct = async (req, res, next) => {
+    const { pid } = req.params;
+    if (!pid) {
+        return next(new ApiError(400, "Product id is required"))
+    }
+    try {
+        const product = await productModel.findById(pid).populate("category");
+        if (!product) {
+            return next(new ApiError(401, "Product not fetched"))
+        }
+        res.status(201).json(
+            new ApiResponse(200, product, "Product fetched successfully")
+        )
+    } catch (error) {
+        return next(new ApiError(503, "Failed to fetch products"))
     }
 }
